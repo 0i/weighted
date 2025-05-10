@@ -2,6 +2,7 @@ package weighted
 
 import (
 	"math/rand/v2"
+	"slices"
 	"time"
 )
 
@@ -27,20 +28,41 @@ func NewRandW[T comparable]() *RandW[T] {
 }
 
 // Next returns next selected item.
-func (rw *RandW[T]) Next() (item T) {
-	if rw.n == 0 {
+func (rw *RandW[T]) Next(exclusions ...T) (item T) {
+	if rw.n == 0 || rw.sumOfWeights <= 0 {
 		var t T
 		return t
 	}
-	if rw.sumOfWeights <= 0 {
-		var t T
-		return t
-	}
-	randomWeight := rw.r.IntN(rw.sumOfWeights) + 1
-	for _, item := range rw.items {
-		randomWeight = randomWeight - item.Weight
-		if randomWeight <= 0 {
-			return item.Item
+
+	if es := len(exclusions); es == 0 {
+		randomWeight := rw.r.IntN(rw.sumOfWeights) + 1
+		for _, item := range rw.items {
+			randomWeight = randomWeight - item.Weight
+			if randomWeight <= 0 {
+				return item.Item
+			}
+		}
+	} else {
+		sumOfWeights := 0
+		items := make([]*randWeighted[T], 0, len(rw.items)-es)
+		for _, i := range rw.items {
+			if !slices.Contains(exclusions, i.Item) {
+				items = append(items, i)
+				sumOfWeights += i.Weight
+			}
+		}
+
+		if sumOfWeights <= 0 {
+			var t T
+			return t
+		}
+
+		randomWeight := rw.r.IntN(sumOfWeights) + 1
+		for _, i := range items {
+			randomWeight = randomWeight - i.Weight
+			if randomWeight <= 0 {
+				return i.Item
+			}
 		}
 	}
 

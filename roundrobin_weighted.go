@@ -1,5 +1,7 @@
 package weighted
 
+import "slices"
+
 // rrWeighted is a wrapped weighted item that is used to implement LVS weighted round robin algorithm.
 type rrWeighted[T comparable] struct {
 	Item   T
@@ -65,32 +67,43 @@ func (w *RRW[T]) Reset() {
 }
 
 // Next returns next selected item.
-func (w *RRW[T]) Next() T {
+func (w *RRW[T]) Next(exclusions ...T) T {
 	if w.n == 0 {
 		var t T
 		return t
 	}
 
-	if w.n == 1 {
-		return w.items[0].Item
-	}
+	if len(exclusions) == 0 {
+		if w.n == 1 {
+			return w.items[0].Item
+		}
 
-	for {
-		w.i = (w.i + 1) % w.n
-		if w.i == 0 {
-			w.cw = w.cw - w.gcd
-			if w.cw <= 0 {
-				w.cw = w.maxW
-				if w.cw == 0 {
-					var t T
-					return t
+		for {
+			w.i = (w.i + 1) % w.n
+			if w.i == 0 {
+				w.cw = w.cw - w.gcd
+				if w.cw <= 0 {
+					w.cw = w.maxW
+					if w.cw == 0 {
+						var t T
+						return t
+					}
 				}
+			}
+
+			if w.items[w.i].Weight >= w.cw {
+				return w.items[w.i].Item
+			}
+		}
+	} else {
+		w2 := &RRW[T]{}
+		for _, i := range w.items {
+			if !slices.Contains(exclusions, i.Item) {
+				w2.Add(i.Item, i.Weight)
 			}
 		}
 
-		if w.items[w.i].Weight >= w.cw {
-			return w.items[w.i].Item
-		}
+		return w2.Next()
 	}
 }
 

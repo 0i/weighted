@@ -12,7 +12,7 @@ package weighted
 type W[T comparable] interface {
 	// Next gets next selected item.
 	// Next is not goroutine-safe. You MUST use the snchronization primitive to protect it in concurrent cases.
-	Next() (item T)
+	Next(exclusions ...T) (item T)
 	// Add adds a weighted item for selection.
 	Add(item T, weight int)
 

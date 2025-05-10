@@ -1,5 +1,7 @@
 package weighted
 
+import "slices"
+
 // smoothWeighted is a wrapped weighted item.
 type smoothWeighted[T comparable] struct {
 	Item            T
@@ -65,8 +67,8 @@ func (w *SW[T]) All() map[interface{}]int {
 }
 
 // Next returns next selected server.
-func (w *SW[T]) Next() T {
-	i := w.nextWeighted()
+func (w *SW[T]) Next(exclusions ...T) T {
+	i := w.nextWeighted(exclusions...)
 	if i == nil {
 		var t T
 		return t
@@ -75,15 +77,27 @@ func (w *SW[T]) Next() T {
 }
 
 // nextWeighted returns next selected weighted object.
-func (w *SW[T]) nextWeighted() *smoothWeighted[T] {
+func (w *SW[T]) nextWeighted(exclusions ...T) *smoothWeighted[T] {
 	if w.n == 0 {
 		return nil
 	}
-	if w.n == 1 {
-		return w.items[0]
-	}
 
-	return nextSmoothWeighted[T](w.items)
+	if es := len(exclusions); es == 0 {
+		if w.n == 1 {
+			return w.items[0]
+		}
+
+		return nextSmoothWeighted[T](w.items)
+	} else {
+		items := make([]*smoothWeighted[T], 0, len(w.items)-es)
+		for _, i := range w.items {
+			if !slices.Contains(exclusions, i.Item) {
+				items = append(items, i)
+			}
+		}
+
+		return nextSmoothWeighted[T](items)
+	}
 }
 
 // https://github.com/phusion/nginx/commit/27e94984486058d73157038f7950a0a36ecc6e35
