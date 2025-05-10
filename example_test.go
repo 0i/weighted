@@ -3,7 +3,7 @@ package weighted
 import "fmt"
 
 func ExampleSW_Next() {
-	w := &SW{}
+	w := &SW[string]{}
 	w.Add("a", 5)
 	w.Add("b", 2)
 	w.Add("c", 3)
@@ -16,7 +16,7 @@ func ExampleSW_Next() {
 }
 
 func ExampleRRW_Next() {
-	w := &RRW{}
+	w := &RRW[string]{}
 	w.Add("a", 5)
 	w.Add("b", 2)
 	w.Add("c", 3)
@@ -29,7 +29,7 @@ func ExampleRRW_Next() {
 }
 
 func ExampleRandW_Next() {
-	w := NewRandW()
+	w := NewRandW[string]()
 	w.Add("a", 5)
 	w.Add("b", 2)
 	w.Add("c", 3)

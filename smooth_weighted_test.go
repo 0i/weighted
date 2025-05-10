@@ -3,7 +3,7 @@ package weighted
 import "testing"
 
 func TestSW_Next(t *testing.T) {
-	w := &SW{}
+	w := &SW[string]{}
 	w.Add("server1", 5)
 	w.Add("server2", 2)
 	w.Add("server3", 3)
@@ -11,7 +11,7 @@ func TestSW_Next(t *testing.T) {
 	results := make(map[string]int)
 
 	for i := 0; i < 100; i++ {
-		s := w.Next().(string)
+		s := w.Next()
 		results[s]++
 	}
 
@@ -23,7 +23,7 @@ func TestSW_Next(t *testing.T) {
 	results = make(map[string]int)
 
 	for i := 0; i < 100; i++ {
-		s := w.Next().(string)
+		s := w.Next()
 		results[s]++
 	}
 
@@ -39,7 +39,7 @@ func TestSW_Next(t *testing.T) {
 	results = make(map[string]int)
 
 	for i := 0; i < 29000; i++ {
-		s := w.Next().(string)
+		s := w.Next()
 		results[s]++
 	}
 

@@ -3,7 +3,7 @@ WORKDIR=`pwd`
 default: build
 
 install:
-	go get github.com/smallnest/weighted
+	go get com/0i/weighted
 
 vet:
 	go vet .
@@ -38,7 +38,7 @@ doc:
 	godoc -http=:6060
 
 deps:
-	go list -f '{{ join .Deps  "\n"}}' . |grep "/" | grep -v "github.com/smallnest/weighted"| grep "\." | sort |uniq
+	go list -f '{{ join .Deps  "\n"}}' . |grep "/" | grep -v "github.com/0i/weighted"| grep "\." | sort |uniq
 
 fmt:
 	go fmt .

@@ -1,39 +1,42 @@
 package weighted
 
 import (
+	"math/rand/v2"
 	"time"
-
-	"golang.org/x/exp/rand"
 )
 
 // randWeighted is a wrapped weighted item that is used to implement weighted random algorithm.
-type randWeighted struct {
-	Item   interface{}
+type randWeighted[T comparable] struct {
+	Item   T
 	Weight int
 }
 
 // RandW is a struct that contains weighted items implement weighted random algorithm.
-type RandW struct {
-	items        []*randWeighted
+type RandW[T comparable] struct {
+	items        []*randWeighted[T]
 	n            int
 	sumOfWeights int
 	r            *rand.Rand
 }
 
 // NewRandW creates a new RandW with a random object.
-func NewRandW() *RandW {
-	return &RandW{r: rand.New(rand.NewSource(uint64(time.Now().UnixNano())))}
+func NewRandW[T comparable]() *RandW[T] {
+	rw := &RandW[T]{}
+	rw.Reset()
+	return rw
 }
 
 // Next returns next selected item.
-func (rw *RandW) Next() (item interface{}) {
+func (rw *RandW[T]) Next() (item T) {
 	if rw.n == 0 {
-		return nil
+		var t T
+		return t
 	}
 	if rw.sumOfWeights <= 0 {
-		return nil
+		var t T
+		return t
 	}
-	randomWeight := rw.r.Intn(rw.sumOfWeights) + 1
+	randomWeight := rw.r.IntN(rw.sumOfWeights) + 1
 	for _, item := range rw.items {
 		randomWeight = randomWeight - item.Weight
 		if randomWeight <= 0 {
@@ -45,16 +48,16 @@ func (rw *RandW) Next() (item interface{}) {
 }
 
 // Add adds a weighted item for selection.
-func (rw *RandW) Add(item interface{}, weight int) {
-	rItem := &randWeighted{Item: item, Weight: weight}
+func (rw *RandW[T]) Add(item T, weight int) {
+	rItem := &randWeighted[T]{Item: item, Weight: weight}
 	rw.items = append(rw.items, rItem)
 	rw.sumOfWeights += weight
 	rw.n++
 }
 
 // All returns all items.
-func (rw *RandW) All() map[interface{}]int {
-	m := make(map[interface{}]int)
+func (rw *RandW[T]) All() map[T]int {
+	m := make(map[T]int)
 	for _, i := range rw.items {
 		m[i.Item] = i.Weight
 	}
@@ -62,14 +65,15 @@ func (rw *RandW) All() map[interface{}]int {
 }
 
 // RemoveAll removes all weighted items.
-func (rw *RandW) RemoveAll() {
-	rw.items = make([]*randWeighted, 0)
+func (rw *RandW[T]) RemoveAll() {
+	rw.items = make([]*randWeighted[T], 0)
 	rw.n = 0
 	rw.sumOfWeights = 0
-	rw.r = rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+	rw.Reset()
 }
 
 // Reset resets the balancing algorithm.
-func (rw *RandW) Reset() {
-	rw.r = rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+func (rw *RandW[T]) Reset() {
+	seed := uint64(time.Now().UnixNano())
+	rw.r = rand.New(rand.NewPCG(seed, seed+1))
 }

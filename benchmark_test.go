@@ -1,18 +1,16 @@
 package weighted
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func BenchmarkSW_Next(b *testing.B) {
 	b.ReportAllocs()
-	rand.Seed(time.Now().UnixNano())
-	w := &SW{}
+	w := &SW[string]{}
 	for i := 0; i < 50; i++ {
-		w.Add("item-"+strconv.Itoa(i), rand.Intn(100)+100)
+		w.Add("item-"+strconv.Itoa(i), rand.IntN(100)+100)
 	}
 
 	b.StartTimer()
@@ -25,10 +23,9 @@ func BenchmarkSW_Next(b *testing.B) {
 
 func BenchmarkRRW_Next(b *testing.B) {
 	b.ReportAllocs()
-	rand.Seed(time.Now().UnixNano())
-	w := &RRW{}
+	w := &RRW[string]{}
 	for i := 0; i < 50; i++ {
-		w.Add("item-"+strconv.Itoa(i), rand.Intn(100)+100)
+		w.Add("item-"+strconv.Itoa(i), rand.IntN(100)+100)
 	}
 
 	b.StartTimer()
@@ -41,10 +38,9 @@ func BenchmarkRRW_Next(b *testing.B) {
 
 func BenchmarkRandW_Next(b *testing.B) {
 	b.ReportAllocs()
-	rand.Seed(time.Now().UnixNano())
-	w := NewRandW()
+	w := NewRandW[string]()
 	for i := 0; i < 50; i++ {
-		w.Add("item-"+strconv.Itoa(i), rand.Intn(100)+100)
+		w.Add("item-"+strconv.Itoa(i), rand.IntN(100)+100)
 	}
 
 	b.StartTimer()

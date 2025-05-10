@@ -25,7 +25,7 @@ package main
 import "fmt"
 
 func ExampleSW_Next() {
-	w := &SW{}
+	w := &SW[string]{}
 	w.Add("a", 5)
 	w.Add("b", 2)
 	w.Add("c", 3)
@@ -45,7 +45,7 @@ package main
 import "fmt"
 
 func ExampleRRW_Next() {
-	w := &RRW{}
+	w := &RRW[string]{}
 	w.Add("a", 5)
 	w.Add("b", 2)
 	w.Add("c", 3)

@@ -9,15 +9,15 @@ For LVS round-robin balancing algorithm, you can check http://kb.linuxvirtualite
 package weighted
 
 // W is a interface that implement a weighted round robin algorithm.
-type W interface {
+type W[T comparable] interface {
 	// Next gets next selected item.
 	// Next is not goroutine-safe. You MUST use the snchronization primitive to protect it in concurrent cases.
-	Next() (item interface{})
+	Next() (item T)
 	// Add adds a weighted item for selection.
-	Add(item interface{}, weight int)
+	Add(item T, weight int)
 
 	// All returns all items.
-	All() map[interface{}]int
+	All() map[T]int
 
 	// RemoveAll removes all weighted items.
 	RemoveAll()

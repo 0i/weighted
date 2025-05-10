@@ -1,8 +1,8 @@
 package weighted
 
 // rrWeighted is a wrapped weighted item that is used to implement LVS weighted round robin algorithm.
-type rrWeighted struct {
-	Item   interface{}
+type rrWeighted[T comparable] struct {
+	Item   T
 	Weight int
 }
 
@@ -10,8 +10,8 @@ type rrWeighted struct {
 //
 // http://kb.linuxvirtualitem.org/wiki/Weighted_Round-Robin_Scheduling
 // http://zh.linuxvirtualitem.org/node/37
-type RRW struct {
-	items []*rrWeighted
+type RRW[T comparable] struct {
+	items []*rrWeighted[T]
 	n     int
 	gcd   int
 	maxW  int
@@ -20,8 +20,8 @@ type RRW struct {
 }
 
 // Add a weighted item.
-func (w *RRW) Add(item interface{}, weight int) {
-	weighted := &rrWeighted{Item: item, Weight: weight}
+func (w *RRW[T]) Add(item T, weight int) {
+	weighted := &rrWeighted[T]{Item: item, Weight: weight}
 	if weight > 0 {
 		if w.gcd == 0 {
 			w.gcd = weight
@@ -40,8 +40,8 @@ func (w *RRW) Add(item interface{}, weight int) {
 }
 
 // All returns all items.
-func (w *RRW) All() map[interface{}]int {
-	m := make(map[interface{}]int)
+func (w *RRW[T]) All() map[T]int {
+	m := make(map[T]int)
 	for _, i := range w.items {
 		m[i.Item] = i.Weight
 	}
@@ -49,7 +49,7 @@ func (w *RRW) All() map[interface{}]int {
 }
 
 // RemoveAll removes all weighted items.
-func (w *RRW) RemoveAll() {
+func (w *RRW[T]) RemoveAll() {
 	w.items = w.items[:0]
 	w.n = 0
 	w.gcd = 0
@@ -58,16 +58,17 @@ func (w *RRW) RemoveAll() {
 	w.cw = 0
 }
 
-//Reset resets all current weights.
-func (w *RRW) Reset() {
+// Reset resets all current weights.
+func (w *RRW[T]) Reset() {
 	w.i = -1
 	w.cw = 0
 }
 
 // Next returns next selected item.
-func (w *RRW) Next() interface{} {
+func (w *RRW[T]) Next() T {
 	if w.n == 0 {
-		return nil
+		var t T
+		return t
 	}
 
 	if w.n == 1 {
@@ -81,7 +82,8 @@ func (w *RRW) Next() interface{} {
 			if w.cw <= 0 {
 				w.cw = w.maxW
 				if w.cw == 0 {
-					return nil
+					var t T
+					return t
 				}
 			}
 		}

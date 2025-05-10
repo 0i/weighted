@@ -2,11 +2,12 @@ package weighted_test
 
 import (
 	"testing"
-	"github.com/smallnest/weighted"
+
+	"github.com/0i/weighted"
 )
 
 func TestRandW_Next(t *testing.T) {
-	w := weighted.NewRandW()
+	w := weighted.NewRandW[string]()
 	w.Add("server1", 4)
 	w.Add("server2", 2)
 	w.Add("server3", 3)
@@ -15,7 +16,7 @@ func TestRandW_Next(t *testing.T) {
 	results := make(map[string]int)
 
 	for i := 0; i < 100; i++ {
-		s := w.Next().(string)
+		s := w.Next()
 		results[s]++
 	}
 
@@ -27,7 +28,7 @@ func TestRandW_Next(t *testing.T) {
 	results = make(map[string]int)
 
 	for i := 0; i < 100; i++ {
-		s := w.Next().(string)
+		s := w.Next()
 		results[s]++
 	}
 
@@ -43,7 +44,7 @@ func TestRandW_Next(t *testing.T) {
 	results = make(map[string]int)
 
 	for i := 0; i < 29000; i++ {
-		s := w.Next().(string)
+		s := w.Next()
 		results[s]++
 	}
 
@@ -58,8 +59,8 @@ func checkResults(v, min, max int) bool {
 	return v >= min && v <= max
 }
 
-func TestRandWZero(t *testing.T)  {
-	w := weighted.NewRandW()
+func TestRandWZero(t *testing.T) {
+	w := weighted.NewRandW[string]()
 	w.Add("a", 0)
 	// test panic or not
 	_ = w.Next()

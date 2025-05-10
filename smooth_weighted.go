@@ -1,8 +1,8 @@
 package weighted
 
 // smoothWeighted is a wrapped weighted item.
-type smoothWeighted struct {
-	Item            interface{}
+type smoothWeighted[T comparable] struct {
+	Item            T
 	Weight          int
 	CurrentWeight   int
 	EffectiveWeight int
@@ -22,8 +22,8 @@ In case of { 5, 1, 1 } weights this gives the following sequence of
 current_weight's: (a, a, b, a, c, a, a)
 
 */
-type SW struct {
-	items []*smoothWeighted
+type SW[T comparable] struct {
+	items []*smoothWeighted[T]
 	n     int
 }
 
@@ -35,20 +35,20 @@ type SW struct {
 // }
 
 // Add a weighted server.
-func (w *SW) Add(item interface{}, weight int) {
-	weighted := &smoothWeighted{Item: item, Weight: weight, EffectiveWeight: weight}
+func (w *SW[T]) Add(item T, weight int) {
+	weighted := &smoothWeighted[T]{Item: item, Weight: weight, EffectiveWeight: weight}
 	w.items = append(w.items, weighted)
 	w.n++
 }
 
 // RemoveAll removes all weighted items.
-func (w *SW) RemoveAll() {
+func (w *SW[T]) RemoveAll() {
 	w.items = w.items[:0]
 	w.n = 0
 }
 
-//Reset resets all current weights.
-func (w *SW) Reset() {
+// Reset resets all current weights.
+func (w *SW[T]) Reset() {
 	for _, s := range w.items {
 		s.EffectiveWeight = s.Weight
 		s.CurrentWeight = 0
@@ -56,7 +56,7 @@ func (w *SW) Reset() {
 }
 
 // All returns all items.
-func (w *SW) All() map[interface{}]int {
+func (w *SW[T]) All() map[interface{}]int {
 	m := make(map[interface{}]int)
 	for _, i := range w.items {
 		m[i.Item] = i.Weight
@@ -65,16 +65,17 @@ func (w *SW) All() map[interface{}]int {
 }
 
 // Next returns next selected server.
-func (w *SW) Next() interface{} {
+func (w *SW[T]) Next() T {
 	i := w.nextWeighted()
 	if i == nil {
-		return nil
+		var t T
+		return t
 	}
 	return i.Item
 }
 
 // nextWeighted returns next selected weighted object.
-func (w *SW) nextWeighted() *smoothWeighted {
+func (w *SW[T]) nextWeighted() *smoothWeighted[T] {
 	if w.n == 0 {
 		return nil
 	}
@@ -82,11 +83,11 @@ func (w *SW) nextWeighted() *smoothWeighted {
 		return w.items[0]
 	}
 
-	return nextSmoothWeighted(w.items)
+	return nextSmoothWeighted[T](w.items)
 }
 
-//https://github.com/phusion/nginx/commit/27e94984486058d73157038f7950a0a36ecc6e35
-func nextSmoothWeighted(items []*smoothWeighted) (best *smoothWeighted) {
+// https://github.com/phusion/nginx/commit/27e94984486058d73157038f7950a0a36ecc6e35
+func nextSmoothWeighted[T comparable](items []*smoothWeighted[T]) (best *smoothWeighted[T]) {
 	total := 0
 
 	for i := 0; i < len(items); i++ {
